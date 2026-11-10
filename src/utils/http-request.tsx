@@ -1,12 +1,37 @@
-import axios from "axios"
+
 import "regenerator-runtime/runtime.js";
 
-const httpRequest = async (alpha2Code: any) => {
-  const result = await axios.get(`https://restcountries.com/v2/lang/${alpha2Code}`)
-  if (result.status) {
-      console.log(`REST API call status: ${result.status}`)
-  }
-  return result
+export interface Country {
+  names: {
+    common: string;
+  };
+  languages: {
+    name: string;
+    iso639_1: string;
+  }[];
 }
+
+const httpRequest = async () => {
+  const apiKey = import.meta.env.VITE_COUNTRIES_API_KEY;
+  
+  console.log("API key loaded:", Boolean(apiKey));
+
+  const response = await fetch(
+    "https://api.restcountries.com/countries/v5?limit=100",
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to retrieve country information.");
+  }
+
+  const result = await response.json();
+
+  return result.data.objects as Country[];
+};
 
 export default httpRequest;
